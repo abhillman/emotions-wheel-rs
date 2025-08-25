@@ -27,7 +27,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04b88ca4d56f46dfa7775b494e441116ecff561d82f29ddd9634ed94b176a50d"
 
 [[package]]
-name = "emotions-wheel"
+name = "emotions-wheel-rs"
 version = "0.1.0"
 dependencies = [
  "anyhow",

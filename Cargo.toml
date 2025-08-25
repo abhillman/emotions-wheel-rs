@@ -1,10 +1,10 @@
 [package]
-name = "emotions-wheel"
+name = "emotions-wheel-rs"
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
 description = "Emotions wheel written in Rust that draws to a <canvas/> element in the browser via WASM"
-repository = "https://github.com/abhillman/emotions-wheel"
+repository = "https://github.com/abhillman/emotions-wheel-rs"
 
 [lib]
 crate-type = ["cdylib"]
@@ -22,7 +22,6 @@ web-sys = { version = "0.3.77", features = [
     "CanvasRenderingContext2d",
     "CanvasPattern",
 ] }
-
 
 [package.metadata.wasm-pack.profile.dev.wasm-bindgen]
 dwarf-debug-info = true
