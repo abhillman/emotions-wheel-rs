@@ -1,6 +1,6 @@
-use anyhow::Result;
-use log::warn;
+use anyhow::{Result, bail};
 use js_sys::Math::{cos, sin};
+use std::cmp::PartialEq;
 use wasm_bindgen::JsValue;
 use web_sys::CanvasRenderingContext2d;
 
@@ -17,30 +17,63 @@ pub struct Arc {
     center: Point,
 }
 
+impl PartialEq for Point {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0 && self.1 == other.1
+    }
+}
+
+pub struct Circle {
+    pub radius: Number,
+    pub center: Point,
+}
+
+impl Circle {
+    pub fn scale(&self, scale: f64) -> Circle {
+        Circle {
+            radius: self.radius * scale,
+            center: self.center.clone(),
+        }
+    }
+}
+
 impl Arc {
+    pub fn from_circle(n: usize, total: usize, circle: &Circle) -> Arc {
+        Arc::make_sliver(n, total, circle.radius, circle.center.clone())
+    }
+
     pub fn make_sliver(n: usize, total: usize, radius: Number, center: Point) -> Arc {
         Arc {
-            start_angle: std::f64::consts::PI * (2.0 / total as f64) * n as f64 - 0.5 * std::f64::consts::PI,
-            end_angle: std::f64::consts::PI * (2.0 / total as f64) * ((n as f64) + 1.0) - 0.5 * std::f64::consts::PI,
+            start_angle: std::f64::consts::PI * (2.0 / total as f64) * n as f64
+                - 0.5 * std::f64::consts::PI,
+            end_angle: std::f64::consts::PI * (2.0 / total as f64) * ((n as f64) + 1.0)
+                - 0.5 * std::f64::consts::PI,
             radius,
             center,
         }
     }
 
-    pub fn scale(&self, scale: f64) -> Arc {
-        match self {
-            Arc {
-                start_angle,
-                end_angle,
-                radius,
-                center,
-            } => Arc {
-                start_angle: start_angle.to_owned(),
-                end_angle: end_angle.to_owned(),
-                radius: radius * scale,
-                center: center.to_owned(),
-            },
+    #[allow(dead_code)]
+    pub fn join(arc0: Arc, arc2: Arc) -> Result<Arc> {
+        if arc0.radius != arc2.radius {
+            bail!("radius mismatch");
         }
+
+        if arc0.center != arc2.center {
+            bail!("center mismatch");
+        }
+
+        let start_angle = f64::min(arc0.start_angle, arc2.start_angle);
+        let end_angle = f64::max(arc0.end_angle, arc2.end_angle);
+        let radius = arc0.radius;
+        let center = arc0.center;
+
+        Ok(Arc {
+            start_angle,
+            end_angle,
+            radius,
+            center,
+        })
     }
 }
 
@@ -55,6 +88,7 @@ pub struct DrawOptions {
 pub struct DrawTextOptions {
     pub fill_style: Option<String>,
     pub font: Option<String>,
+    pub radius: Number,
 }
 
 impl Default for DrawOptions {
@@ -87,17 +121,14 @@ impl Draw for Arc {
         )?;
 
         if let Some(fill_style) = &draw_options.fill_style {
-            warn!("fill style: {:?}", fill_style);
             context.set_fill_style_str(fill_style);
         }
 
         if let Some(line_width) = draw_options.line_width {
-            warn!("line width: {:?}", line_width);
             context.set_line_width(line_width);
         }
 
         if let Some(stroke) = &draw_options.stroke_style {
-            warn!("stroke style: {:?}", stroke);
             context.set_stroke_style_str(stroke);
         }
 
@@ -113,9 +144,16 @@ impl Draw for Arc {
         Ok(self)
     }
 
-    fn draw_text<'a>(&self, text: &'a str, draw_options: &DrawTextOptions, context: &mut CanvasRenderingContext2d) -> Result<&Self, JsValue> {
-        let x = self.center.0 + self.radius * 0.7 * cos((self.start_angle + self.end_angle) / 2.0);
-        let y = self.center.1 + self.radius * 0.7 * sin((self.start_angle + self.end_angle) / 2.0);
+    fn draw_text(
+        &self,
+        text: &str,
+        draw_options: &DrawTextOptions,
+        context: &mut CanvasRenderingContext2d,
+    ) -> Result<&Self, JsValue> {
+        let x =
+            self.center.0 + draw_options.radius * cos((self.start_angle + self.end_angle) / 2.0);
+        let y =
+            self.center.1 + draw_options.radius * sin((self.start_angle + self.end_angle) / 2.0);
 
         context.save();
         context.begin_path();

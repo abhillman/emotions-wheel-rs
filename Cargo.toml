@@ -1,15 +1,20 @@
 [package]
-name = "untitled8"
+name = "emotions-wheel"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+description = "Emotions wheel written in Rust that draws to a <canvas/> element in the browser via WASM"
+repository = "https://github.com/abhillman/emotions-wheel"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-random_color = { version = "1.1.0" }
+anyhow = "1.0.99"
+emotions = "0.1.1"
+js-sys = "0.3.77"
 wasm-bindgen = "0.2.100"
-getrandom = { version = "0.3.3", features = ["wasm_js"] }
+wasm-log = "0.3.1"
 web-sys = { version = "0.3.77", features = [
     "Window",
     "Document",
@@ -17,15 +22,7 @@ web-sys = { version = "0.3.77", features = [
     "CanvasRenderingContext2d",
     "CanvasPattern",
 ] }
-log = "0.4.27"
-wasm-log = "0.3.1"
-wasm-bindgen-futures = "0.4.50"
-js-sys = "0.3.77"
-anyhow = "1.0.99"
-emotions = "0.1.1"
 
-[dev-dependencies]
-wasm-bindgen-test = "0.3.50"
 
 [package.metadata.wasm-pack.profile.dev.wasm-bindgen]
 dwarf-debug-info = true

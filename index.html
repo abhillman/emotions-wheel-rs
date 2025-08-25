@@ -1,12 +1,14 @@
 <html>
-<head></head>
+<head>
+    <title>Emotions Wheel</title>
+</head>
 <body>
-    <canvas id="canvas"></canvas>
+    <canvas id="the-canvas"></canvas>
 </body>
 <script type="module">
-    import init, {okok} from "./pkg/untitled8.js"
+    import init, {draw_emotions_wheel} from "./pkg/emotions_wheel.js"
     init().then(() => {
-        okok();
+        draw_emotions_wheel('the-canvas');
     })
 </script>
 </html>
